@@ -12,13 +12,10 @@ var xEnv assert.Environment
 
 	hash := "lisi"
 	cnd.match("lisi") @end(true)
-
-
-
 */
 
 func newLuaCondition(L *lua.LState) int {
-	L.Push(newCondL(L))
+	L.Push(newLCond(L))
 	return 1
 }
 

@@ -68,8 +68,27 @@ func (s *Section) withB(offset *int, n int) {
 		sep++
 	}
 
+	switch s.raw[sep] {
+	case '=':
+		s.method = eq
+		*offset = sep + 1
+		return
+
+	case '>':
+		s.method = gt
+		*offset = sep + 1
+		return
+
+	case '<':
+		s.method = lt
+		*offset = sep + 1
+		return
+	}
+
 	em := s.raw[sep : sep+2]
 	switch em {
+	case "==":
+		s.method = eq
 	case "eq":
 		s.method = eq
 	case "re":
@@ -80,12 +99,13 @@ func (s *Section) withB(offset *int, n int) {
 		s.method = in
 	case "lt":
 		s.method = lt
-	case "le":
-		s.method = le
-	case "ge":
-		s.method = ge
 	case "gt":
 		s.method = gt
+
+	case "le", "<=":
+		s.method = le
+	case "ge", ">=":
+		s.method = ge
 
 	default:
 		s.invalid("invalid method %s", em)

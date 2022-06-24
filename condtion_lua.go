@@ -5,48 +5,48 @@ import (
 	"github.com/vela-security/vela-public/pipe"
 )
 
-type CondL struct {
+type LCond struct {
 	onMatch *pipe.Px
 	noMatch *pipe.Px
 	co      *lua.LState
 	cnd     *Cond
 }
 
-func (c *CondL) String() string                         { return "vela.condition" }
-func (c *CondL) Type() lua.LValueType                   { return lua.LTObject }
-func (c *CondL) AssertFloat64() (float64, bool)         { return 0, false }
-func (c *CondL) AssertString() (string, bool)           { return "", false }
-func (c *CondL) AssertFunction() (*lua.LFunction, bool) { return nil, false }
-func (c *CondL) Peek() lua.LValue                       { return c }
+func (lc *LCond) String() string                         { return "vela.condition" }
+func (lc *LCond) Type() lua.LValueType                   { return lua.LTObject }
+func (lc *LCond) AssertFloat64() (float64, bool)         { return 0, false }
+func (lc *LCond) AssertString() (string, bool)           { return "", false }
+func (lc *LCond) AssertFunction() (*lua.LFunction, bool) { return nil, false }
+func (lc *LCond) Peek() lua.LValue                       { return lc }
 
-func (c *CondL) okL(L *lua.LState) int {
-	c.onMatch = pipe.NewByLua(L, pipe.Seek(0), pipe.Env(xEnv))
-	L.Push(c)
+func (lc *LCond) okL(L *lua.LState) int {
+	lc.onMatch = pipe.NewByLua(L, pipe.Seek(0), pipe.Env(xEnv))
+	L.Push(lc)
 	return 1
 }
 
-func (c *CondL) noL(L *lua.LState) int {
-	c.noMatch = pipe.NewByLua(L, pipe.Seek(0), pipe.Env(xEnv))
-	L.Push(c)
+func (lc *LCond) noL(L *lua.LState) int {
+	lc.noMatch = pipe.NewByLua(L, pipe.Seek(0), pipe.Env(xEnv))
+	L.Push(lc)
 	return 1
 }
 
-func (c *CondL) match(lv lua.LValue, L *lua.LState) bool {
-	if c.cnd.Match(lv) {
-		c.onMatch.Do(lv, L, func(err error) {
+func (lc *LCond) Match(lv lua.LValue, L *lua.LState) bool {
+	if lc.cnd.Match(lv) {
+		lc.onMatch.Do(lv, L, func(err error) {
 			xEnv.Errorf("condition match function pipe fail %v", err)
 		})
 
 		return true
 	}
 
-	c.noMatch.Do(lv, L, func(err error) {
+	lc.noMatch.Do(lv, L, func(err error) {
 		xEnv.Errorf("condition not match function pipe fail %v", err)
 	})
 	return false
 }
 
-func (c *CondL) matchL(L *lua.LState) int {
+func (lc *LCond) matchL(L *lua.LState) int {
 	n := L.GetTop()
 	if n == 0 {
 		L.Push(lua.LFalse)
@@ -54,7 +54,7 @@ func (c *CondL) matchL(L *lua.LState) int {
 	}
 
 	for i := 1; i <= n; i++ {
-		if c.match(L.Get(i), L) {
+		if lc.Match(L.Get(i), L) {
 			L.Push(lua.LTrue)
 			return 1
 		}
@@ -64,33 +64,33 @@ func (c *CondL) matchL(L *lua.LState) int {
 	return 1
 }
 
-func (c *CondL) Index(L *lua.LState, key string) lua.LValue {
+func (lc *LCond) Index(L *lua.LState, key string) lua.LValue {
 	switch key {
 	case "ok":
-		return lua.NewFunction(c.okL)
+		return lua.NewFunction(lc.okL)
 	case "no":
-		return lua.NewFunction(c.noL)
+		return lua.NewFunction(lc.noL)
 	case "match":
-		return lua.NewFunction(c.matchL)
+		return lua.NewFunction(lc.matchL)
 	}
 
 	return lua.LNil
 }
 
-func (c *CondL) NewIndex(L *lua.LState, key string, val lua.LValue) {
+func (lc *LCond) NewIndex(L *lua.LState, key string, val lua.LValue) {
 	switch key {
 	case "ok":
-		c.onMatch = pipe.New(pipe.Env(xEnv))
-		c.onMatch.LValue(val)
+		lc.onMatch = pipe.New(pipe.Env(xEnv))
+		lc.onMatch.LValue(val)
 	case "no":
-		c.onMatch = pipe.New(pipe.Env(xEnv))
-		c.onMatch.LValue(val)
+		lc.onMatch = pipe.New(pipe.Env(xEnv))
+		lc.onMatch.LValue(val)
 	}
 
 }
 
-func newCondL(L *lua.LState) *CondL {
-	return &CondL{
+func newLCond(L *lua.LState) *LCond {
+	return &LCond{
 		onMatch: pipe.New(pipe.Env(xEnv)),
 		noMatch: pipe.New(pipe.Env(xEnv)),
 		co:      xEnv.Clone(L),

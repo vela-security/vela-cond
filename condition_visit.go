@@ -30,8 +30,8 @@ func (cnd *Cond) CheckMany(L *lua.LState, opt ...func(*option)) {
 		L.RaiseError("condition compile fail %v", sec.err)
 
 	default:
-		for idx := ov.seek + 2; idx <= n; idx++ {
-			sec := Compile(L.IsString(ov.seek + 1))
+		for idx := ov.seek + 1; idx <= n; idx++ {
+			sec := Compile(L.IsString(idx))
 			if sec.Ok() {
 				cnd.append(sec)
 				continue

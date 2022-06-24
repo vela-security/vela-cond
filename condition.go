@@ -34,3 +34,32 @@ func CheckMany(L *lua.LState, opt ...func(*option)) *Cond {
 	cnd.CheckMany(L, opt...)
 	return cnd
 }
+
+func Check(L *lua.LState, idx int) *LCond {
+	ov := L.CheckObject(idx)
+
+	lc, ok := ov.(*LCond)
+	if ok {
+		lc.co = xEnv.Clone(L)
+		return lc
+	}
+
+	L.RaiseError("invalid condition object , got %p", &ov)
+	return nil
+}
+
+func LValue(L *lua.LState, val lua.LValue) *LCond {
+	if val.Type() != lua.LTObject {
+		L.RaiseError("invalid condition type , got %v", val.Type().String())
+
+	}
+
+	lc, ok := val.(*LCond)
+	if ok {
+		lc.co = xEnv.Clone(L)
+		return lc
+	}
+
+	L.RaiseError("invalid condition object , got %p", &val)
+	return nil
+}
