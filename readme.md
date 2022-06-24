@@ -33,8 +33,15 @@
 - le 小于等于
 - ge 大于等于
 - gt 大于
-# 单个
-key eq value 
-key eq value,value,value
-
+```
+    # 单个
+    key eq value 
+    key eq value,value,value
+    
+    # 多个
+    key1,key2 eq value1,value2
+    
+    # 取反
+    key !eq value,value2,value3
+    key !cn *v,*v2
 ```
