@@ -15,6 +15,7 @@ const (
 	ge
 	gt
 	oop
+	pass
 )
 
 var (

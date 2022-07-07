@@ -170,6 +170,10 @@ func (s *Section) Call(ov *option) (bool, error) {
 		return false, fmt.Errorf("invalid peek function")
 	}
 
+	if s.method == pass {
+		return true, nil
+	}
+
 	if !s.Ok() {
 		return false, s.err
 	}
@@ -192,6 +196,13 @@ func Compile(raw string) *Section {
 	section := &Section{
 		raw:    raw,
 		method: oop,
+	}
+	switch raw {
+	case "", "*", "all":
+		return &Section{
+			raw:    raw,
+			method: pass,
+		}
 	}
 
 	n := len(raw)
